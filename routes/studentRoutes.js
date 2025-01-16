@@ -1,5 +1,5 @@
 const {Router}  = require("express");
-const {userModel} = require("../db");
+const {userModel, complaintModel, adminModel} = require("../db");
 const bcrypt = require("bcrypt");
 const { isValidInp } = require("../middlewares/isValid");
 const { isValidStudent } = require("../middlewares/validStudent");
@@ -12,7 +12,8 @@ studentRouter.post("/signup",isValidInp,async (req,res)=>{
         email,
         password : await bcrypt.hash(password,5),
         rollno,
-        attendance : 0
+        attendance : 0,
+        total : 0
     });
     res.json({
         message : "User added successfully"
@@ -71,11 +72,25 @@ studentRouter.get("/attendance",isValidStudent,async (req,res)=>{
     }
 });
 
-studentRouter.post("/complaint",isValidStudent,(req,res)=>{
-    res.json({
-        message : "/admin/complaint"
-    });
+studentRouter.post("/complaint",isValidStudent,async (req,res)=>{
+    const { userId,admin,desc } = req.body;
+    try{
+        const foundAdmin = await adminModel.findOne({fullname : admin});
+        const foundStudent = await userModel.findOne({rollno : userId})
+        await complaintModel.create({
+            adminId : foundAdmin._id,
+            studdentId : foundStudent._id,
+            desc
+        });
+        res.status(200).json({
+            message : "Complain registered successfully!!"
+        });
+    }catch(err){
+        res.status(500).json({
+            message : "Cannot register your complaint!!"
+        });
+    }
 });
 module.exports  ={
-    studentRouter
+    studentRouter 
 }

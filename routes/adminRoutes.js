@@ -47,10 +47,11 @@ adminRouter.post("/marks",isValidAdmin,async (req,res)=>{
     try{
         const foundUser = await userModel.findOne({rollno : rollno});
         if(!foundUser){
-            res.json({
+            return res.json({
                 message : "Student not found!!"
             });
         }
+        //add a feature like if a teacher added a score to a subject then again they could add it
         const formattedResult = result.map(item => { 
             return Object.entries(item).map(([sub, percentage]) => ({ sub, percentage })); 
         }).flat();            
@@ -69,27 +70,30 @@ adminRouter.post("/marks",isValidAdmin,async (req,res)=>{
         })
     }
 });
-
 adminRouter.post("/attendance",isValidAdmin,async (req,res)=>{
-    const {rollno} = req.body;
+    const {rollno,present} = req.body;
     try{
         const foundUser = await userModel.findOne({rollno : rollno});
         if(!foundUser){
-            return res.status(403).json({
-                message : "Cannot find the user" 
+            return res.json({
+                message : "Cant find student with the roll number!!"
             });
         }
-        foundUser.attendance++;
+        if(present){
+            foundUser.attendance++;
+        }
+        foundUser.total++;
         foundUser.save();
-        //later add a feature like if the button is clicked twice then take the attendance
-        res.json({
+        res.status(200).json({
             message : "Attendance added successfully",
-            attendance : foundUser.attendance
+            present : foundUser.attendance,
+            total : foundUser.total,
+            percentage : parseFloat((foundUser.attendance/foundUser.total*100).toFixed(2))
         });
     }catch(err){
-        res.status(500).json({
-            message : "Cannot update the attendance"
-        });
+        res.status(403).json({
+            message : "Something is wrong!!"
+        })
     }
 });
 

@@ -19,7 +19,8 @@ const userSchema = new Schema({
     password : {type : String,required: true},
     rollno : {type:String,required:true,unique:true},
     marks:[marksSchema],
-    attendance : Number
+    attendance : Number,
+    total : Number
 });
 
 const adminSchema = new Schema({
@@ -32,8 +33,10 @@ const adminSchema = new Schema({
 });
 
 const complaintSchema = new Schema({
+    //Work on this not yet completed
     adminId : ObjectId,
-    studdentId : ObjectId
+    studdentId : ObjectId,
+    desc : String
 });
 
 const userModel = mongoose.model("Students",userSchema);
